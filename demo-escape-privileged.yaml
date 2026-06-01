@@ -1,0 +1,25 @@
+# demo-escape-privileged.yaml
+# Misconfiguration : privileged: true + montage du filesystem root du nœud
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-escape-01
+  labels:
+    pod-security.kubernetes.io/enforce: "privileged"
+---
+# demo-escape-hostpid.yaml
+# Misconfiguration : hostPID: true + privileged permet d'entrer dans le namespace du nœud
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-escape-pid
+  namespace: demo-escape-01
+spec:
+  # hostPID: true                 # ⚠️ partage le namespace PID du nœud
+  # hostNetwork: true             # ⚠️ partage le réseau du nœud
+  containers:
+  - name: attacker
+    image: alpine
+    command: ["/bin/sh", "-c", "sleep 99999"]
+    securityContext:
+      privileged: false
